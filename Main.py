@@ -14,32 +14,35 @@ menu_options = {
 
 
 def print_menu(show_option):
-    os.system("cls")
+
     columns = ["Sel.", "Options"]
     myTable = PrettyTable()
 
-    if (show_option == "all"):
+    if (show_option == "All"):
         # Add Columns
+        os.system("cls")
         myTable.add_column(columns[0], ["1", "2", "3", "4", "5"])
         myTable.add_column(columns[1], [
                            "Add a task", "Remove a task", "Edit a task", "Show all tasks", "Exit"])
-        input("All")
     else:
+        os.system("cls")
         myTable.add_column(columns[0], ["1", "2"])
         myTable.add_column(columns[1], [
                            "Add a task", "Exit"])
-        input("empty_bank")
+
     print(myTable)
-    input
+    menu_input(show_option)
+
 
 # User input for Menu
 
 
-def input(menu_type):
+def menu_input(menu_type):
     menu_selection = input("Select: ")
     if menu_type == "All":
         if menu_selection == "1":
-            add_task()
+            print("Add a task")
+            # add_task()
         elif menu_selection == "2":
             pass
         elif menu_selection == "3":
@@ -47,17 +50,21 @@ def input(menu_type):
         elif menu_selection == "4":
             pass
         else:
+
             print("Invalid selection")
-            sleep(5)
-            print_menu()
-    else:
+            sleep(2)
+            print_menu("All")
+    if menu_type != "All":
         if menu_selection == "1":
-            add_task()
+            pass
+            # add_task()
         elif menu_selection == "5":
             pass
         else:
             print("Invalid selection")
-            print_menu()
+            sleep(2)
+            print_menu("sdf#")
+            # print_menu()
 
 
 # Add a task
