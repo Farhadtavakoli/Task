@@ -1,6 +1,19 @@
+from ast import Delete
 from time import sleep
+import task_module
 from prettytable import PrettyTable
+import mysql.connector
 import os
+
+
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="YAsinbaba2021",
+    database="myTasks"
+)
+print(".............", mydb)
+
 # Making menu
 menu_options = {
     1: 'Add a task',
@@ -21,6 +34,7 @@ def print_menu(show_option):
     if (show_option == "All"):
         # Add Columns
         os.system("cls")
+        print(mydb)
         myTable.add_column(columns[0], ["1", "2", "3", "4", "5"])
         myTable.add_column(columns[1], [
                            "Add a task", "Remove a task", "Edit a task", "Show all tasks", "Exit"])
@@ -39,16 +53,32 @@ def print_menu(show_option):
 
 def menu_input(menu_type):
     menu_selection = input("Select: ")
+    task_list = []
     if menu_type == "All":
         if menu_selection == "1":
             print("Add a task")
-            # add_task()
+            add_task()
         elif menu_selection == "2":
             pass
         elif menu_selection == "3":
             pass
         elif menu_selection == "4":
-            pass
+            mycursor = mydb.cursor()
+            mycursor.execute("SELECT * FROM task WHERE status='Not Done'")
+            myresult = mycursor.fetchall()
+            print(len(myresult))
+
+            print("Number of registered tasks in the bank: ",
+                  len(myresult))
+
+            myTable = PrettyTable()
+            myTable.field_names = ["Title", "What to do", "Status", "Due date"]
+            for index in range(len(myresult)):
+                myTable.add_row(myresult[index])
+            print(myTable)
+            input("Press any key to continue...")
+            print_menu("All")
+
         else:
 
             print("Invalid selection")
@@ -68,14 +98,34 @@ def menu_input(menu_type):
 
 
 # Add a task
-def add_task(title, explanation, status, date):
+def add_task():
+    status = "Not done"
+    title = input("Enter a title for the task: ")
+    explanation = input("Enter explanation: ")
+    date = input("Enter due date: ")
+    new_task = task_module.task(title, explanation, "not down", date)
+    # Saving to the database here
+    print(new_task.title, new_task.explanation,
+          new_task.status, new_task.date)
+    # ****************
+    sql = "INSERT INTO task (title, explanation,status,date) VALUES (%s, %s,%s,%s)"
 
-    task = {"title": title, "explanation": explanation,
-            "status": status, "date": date}
+    val = (title, explanation, status, date)
+    mycursor = mydb.cursor()
+    mycursor.execute(sql, val)
+    mydb.commit()
+    # ****************
+    sleep(2)
+    print_menu("All")
 
-    print(task)
 
-
+print_menu("All")
 # Specify the Column Names while initializing the Table
 # Add rows
-print_menu("All")
+# print_menu("All")
+
+
+''' Todo
+Check the length of the bank! If the length is greater 
+Than 0, the menu with all the available alternatives should
+calls otherwise the menu with 2 alternatives calls.'''
