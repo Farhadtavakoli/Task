@@ -34,10 +34,10 @@ def print_menu(show_option):
     if (show_option == "All"):
         # Add Columns
         os.system("cls")
-        print(mydb)
-        myTable.add_column(columns[0], ["1", "2", "3", "4", "5"])
+
+        myTable.add_column(columns[0], ["1", "2", "3", "4", "5", "6", "7"])
         myTable.add_column(columns[1], [
-                           "Add a task", "Remove a task", "Edit a task", "Show all tasks", "Exit"])
+                           "Add a task", "Remove a task", "Edit a task", "Show all tasks", "Show completed tasks", "Show not completed tasks", "Exit"])
     else:
         os.system("cls")
         myTable.add_column(columns[0], ["1", "2"])
@@ -63,23 +63,11 @@ def menu_input(menu_type):
         elif menu_selection == "3":
             pass
         elif menu_selection == "4":
-            mycursor = mydb.cursor()
-            mycursor.execute("SELECT * FROM task WHERE status='Not Done'")
-            myresult = mycursor.fetchall()
-            print(len(myresult))
-
-            print("Number of registered tasks in the bank: ",
-                  len(myresult))
-
-            myTable = PrettyTable()
-
-            myTable.field_names = ["Title", "What to do", "Status", "Due date"]
-            myTable.max_width = {"Title": 100}
-            for index in range(len(myresult)):
-                myTable.add_row(myresult[index])
-            print(myTable)
-            input("Press any key to continue...")
-            print_menu("All")
+            show_Tasks("All")
+        elif menu_selection == "5":
+            show_Tasks("Completed")
+        elif menu_selection == "6":
+            show_Tasks("Not completed")
 
         else:
 
@@ -95,7 +83,7 @@ def menu_input(menu_type):
         else:
             print("Invalid selection")
             sleep(2)
-            print_menu("sdf#")
+            print_menu("")
             # print_menu()
 
 
@@ -105,7 +93,7 @@ def add_task():
     title = input("Enter a title for the task: ")
     explanation = input("Enter explanation: ")
     date = input("Enter due date: ")
-    new_task = task_module.task(title, explanation, "not down", date)
+    new_task = task_module.task(title, explanation, "Not Done", date)
     # Saving to the database here
     print(new_task.title, new_task.explanation,
           new_task.status, new_task.date)
@@ -118,6 +106,38 @@ def add_task():
     mydb.commit()
     # ****************
     sleep(2)
+    print_menu("All")
+
+
+def show_Tasks(status):
+
+    mycursor = mydb.cursor()
+    if (status == "All"):
+        mycursor.execute("SELECT * FROM task")
+    elif (status == "Completed"):
+        mycursor.execute("SELECT * FROM task WHERE status='Done'")
+    elif (status == "Not completed"):
+        mycursor.execute("SELECT * FROM task WHERE status='Not Done'")
+
+    myresult = mycursor.fetchall()
+
+    mycursor = mydb.cursor()
+
+    sql = "DELETE FROM task WHERE status = 'Not Done'"
+
+    mycursor.execute(sql)
+
+    mydb.commit()
+
+    myTable = PrettyTable()
+
+    myTable.field_names = ["Title", "What to do", "Status", "Due date"]
+
+    for index in range(len(myresult)):
+        myTable.add_row(myresult[index])
+        print(myTable)
+    print(len(myresult))
+    input("Press any key to continue...")
     print_menu("All")
 
 
