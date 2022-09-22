@@ -72,7 +72,9 @@ def menu_input(menu_type):
                   len(myresult))
 
             myTable = PrettyTable()
+
             myTable.field_names = ["Title", "What to do", "Status", "Due date"]
+            myTable.max_width = {"Title": 100}
             for index in range(len(myresult)):
                 myTable.add_row(myresult[index])
             print(myTable)
@@ -119,7 +121,15 @@ def add_task():
     print_menu("All")
 
 
-print_menu("All")
+mycursor = mydb.cursor()
+mycursor.execute("SELECT * FROM task")
+myresult = mycursor.fetchall()
+if (len(myresult) == 0):
+    print_menu("")
+else:
+    print_menu("All")
+
+
 # Specify the Column Names while initializing the Table
 # Add rows
 # print_menu("All")
