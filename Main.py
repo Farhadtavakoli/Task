@@ -76,8 +76,9 @@ def menu_input(menu_type):
             print_menu("All")
     if menu_type != "All":
         if menu_selection == "1":
-            pass
-            # add_task()
+            print("Add a task")
+            add_task()
+
         elif menu_selection == "5":
             pass
         else:
@@ -98,9 +99,10 @@ def add_task():
     print(new_task.title, new_task.explanation,
           new_task.status, new_task.date)
     # ****************
-    sql = "INSERT INTO task (title, explanation,status,date) VALUES (%s, %s,%s,%s)"
+    sql = "INSERT INTO dailyTask (title, explanation,status,date) VALUES (%s, %s,%s,%s)"
 
-    val = (title, explanation, status, date)
+    val = (new_task.title, new_task.explanation,
+           new_task.status, new_task.date)
     mycursor = mydb.cursor()
     mycursor.execute(sql, val)
     mydb.commit()
@@ -113,40 +115,39 @@ def show_Tasks(status):
 
     mycursor = mydb.cursor()
     if (status == "All"):
-        mycursor.execute("SELECT * FROM task")
+        mycursor.execute("SELECT * FROM dailyTask")
     elif (status == "Completed"):
-        mycursor.execute("SELECT * FROM task WHERE status='Done'")
+        mycursor.execute("SELECT * FROM dailyTask WHERE status='Done'")
     elif (status == "Not completed"):
-        mycursor.execute("SELECT * FROM task WHERE status='Not Done'")
+        mycursor.execute("SELECT * FROM dailyTask WHERE status='Not Done'")
 
     myresult = mycursor.fetchall()
-
-    mycursor = mydb.cursor()
-
-    sql = "DELETE FROM task WHERE status = 'Not Done'"
-
-    mycursor.execute(sql)
-
-    mydb.commit()
-
+    #print(myresult, "<----------")
     myTable = PrettyTable()
-
-    myTable.field_names = ["Title", "What to do", "Status", "Due date"]
+    myTable.field_names = ["Id", "Title", "What to do", "Status", "Due date"]
 
     for index in range(len(myresult)):
         myTable.add_row(myresult[index])
-        print(myTable)
+
+    print(myTable)
     print(len(myresult))
     input("Press any key to continue...")
     print_menu("All")
 
 
 mycursor = mydb.cursor()
-mycursor.execute("SELECT * FROM task")
+
+
+mycursor.execute("SELECT * FROM dailyTask")
+
 myresult = mycursor.fetchall()
+print(myresult, " <------------")
+input()
 if (len(myresult) == 0):
+
     print_menu("")
 else:
+
     print_menu("All")
 
 
