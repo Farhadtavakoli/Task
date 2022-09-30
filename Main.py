@@ -1,5 +1,7 @@
 from ast import Delete
+# from curses import raw
 from time import sleep
+from unittest import result
 import task_module
 from prettytable import PrettyTable
 import mysql.connector
@@ -17,10 +19,11 @@ print(".............", mydb)
 # Making menu
 menu_options = {
     1: 'Add a task',
-    2: 'Remove a task',
-    3: 'Edit a task',
-    4: 'Show all tasks',
-    5: 'Exit'
+    2: 'Make a task complete',
+    3: 'Remove a task',
+    4: 'Edit a task',
+    5: 'Show all tasks',
+    6: 'Exit'
 }
 
 # Menu
@@ -35,9 +38,10 @@ def print_menu(show_option):
         # Add Columns
         os.system("cls")
 
-        myTable.add_column(columns[0], ["1", "2", "3", "4", "5", "6", "7"])
+        myTable.add_column(
+            columns[0], ["1", "2", "3", "4", "5", "6", "7", "8"])
         myTable.add_column(columns[1], [
-                           "Add a task", "Remove a task", "Edit a task", "Show all tasks", "Show completed tasks", "Show not completed tasks", "Exit"])
+                           "Add a task", "Make a task complete", "Remove a task", "Edit a task", "Show all tasks", "Show completed tasks", "Show not completed tasks", "Exit"])
     else:
         os.system("cls")
         myTable.add_column(columns[0], ["1", "2"])
@@ -59,15 +63,24 @@ def menu_input(menu_type):
             print("Add a task")
             add_task()
         elif menu_selection == "2":
-            pass
+            show_Tasks("Not completed")
+            complete_Task()
+
         elif menu_selection == "3":
+            # Remove a task
             pass
         elif menu_selection == "4":
-            show_Tasks("All")
+            # Edit_Tasks("All")
+            pass
         elif menu_selection == "5":
-            show_Tasks("Completed")
+            show_Tasks("All")
         elif menu_selection == "6":
+            show_Tasks("Completed")
+        elif menu_selection == "7":
             show_Tasks("Not completed")
+        elif menu_selection == "8":
+            # Exit()
+            pass
 
         else:
 
@@ -109,10 +122,63 @@ def add_task():
     # ****************
     sleep(2)
     print_menu("All")
+# To make a task complete, change the status of the task!
+
+
+def search():
+    flag = False
+    user_input_Message = "Enter the Id for the task: "
+    while (flag == False):
+
+        selection = (input(user_input_Message),)
+        mycursor = mydb.cursor()
+        mycursor.execute("SELECT * FROM dailyTask WHERE Id LIKE %s", selection)
+        myresult = mycursor.fetchall()
+
+        if len(myresult) != 0:
+            flag = True
+            break
+        else:
+            user_input_Message = "Wrong Id! Please enter the Id for the task: "
+    myTable = PrettyTable()
+    myTable.field_names = ["Id", "Title",
+                           "What to do", "Status", "Due date"]
+    for index in range(len(myresult)):
+        myTable.add_row(myresult[index])
+    return myTable, selection
+
+
+def complete_Task():
+    mycursor = mydb.cursor()
+    print(mycursor)
+   # print(selection)
+    flag = False
+    user_input_message = "Is the task completed? [Y/N]: "
+    result = search()
+    print(int(result[1][0])+1)
+    selection = int(result[1][0])
+    res = [result[1][0]]
+    print(type(selection))
+    print(result[0])
+    while flag != True:
+        user_input = input(user_input_message)
+        if (user_input.lower() == "y" or user_input.lower() == "n"
+                or user_input.lower() == "yes" or user_input.lower() == "NO"):
+            break
+        else:
+            print("Wrong answer...")
+    if (user_input.lower() == "y"):
+
+        # sql = ("UPDATE dailyTask SET status = 'Done' WHERE Id LIKE %s",
+        # (result[1][0]))
+        mycursor.execute("UPDATE dailyTask SET status = 'Done' WHERE Id LIKE %s",
+                         res)
+        mydb.commit()
+    else:
+        print_menu("All")
 
 
 def show_Tasks(status):
-
     mycursor = mydb.cursor()
     if (status == "All"):
         mycursor.execute("SELECT * FROM dailyTask")
@@ -122,7 +188,7 @@ def show_Tasks(status):
         mycursor.execute("SELECT * FROM dailyTask WHERE status='Not Done'")
 
     myresult = mycursor.fetchall()
-    #print(myresult, "<----------")
+    # print(myresult, "<----------")
     myTable = PrettyTable()
     myTable.field_names = ["Id", "Title", "What to do", "Status", "Due date"]
 
@@ -131,8 +197,8 @@ def show_Tasks(status):
 
     print(myTable)
     print(len(myresult))
-    input("Press any key to continue...")
-    print_menu("All")
+
+    # print_menu("All")
 
 
 mycursor = mydb.cursor()
@@ -141,8 +207,6 @@ mycursor = mydb.cursor()
 mycursor.execute("SELECT * FROM dailyTask")
 
 myresult = mycursor.fetchall()
-print(myresult, " <------------")
-input()
 if (len(myresult) == 0):
 
     print_menu("")
@@ -151,12 +215,15 @@ else:
     print_menu("All")
 
 
+# Todo
+''' Validation for userinput when the user inputs wrong number '''
+
 # Specify the Column Names while initializing the Table
 # Add rows
 # print_menu("All")
 
 
 ''' Todo
-Check the length of the bank! If the length is greater 
+Check the length of the bank! If the length is greater
 Than 0, the menu with all the available alternatives should
 calls otherwise the menu with 2 alternatives calls.'''
