@@ -183,6 +183,7 @@ def complete_Task(task):
     global id
     is_task_completed = "Do you want to complete the task ? [Y/N]: "
     task_id_selection = "Enter the Id for the task: "
+
     while id_flag != True:
 
         selection = int(input(task_id_selection))
@@ -200,7 +201,7 @@ def complete_Task(task):
     #selection = int(result[1][0])
     # print(type(selection))
     # print(result[0])
-    print("-----------", type(id))
+
     while flag != True:
         user_input = input(is_task_completed)
         if (user_input.lower() == "y" or user_input.lower() == "n"
@@ -210,12 +211,16 @@ def complete_Task(task):
             print("Wrong answer...")
     if (user_input.lower() == "y"):
 
-        # sql = ("UPDATE dailyTask SET status = 'Done' WHERE Id LIKE %s",
-        # (result[1][0]))
+       # sql = ("UPDATE dailyTask SET status = 'Done' WHERE Id LIKE %s",
+        # id)
+        #print("---------------->", sql)
+
         mycursor.execute("UPDATE dailyTask SET status = 'Done' WHERE Id LIKE %s",
-                         id)
+                         ("%" + str(id) + "%",))
         print("The task is completed")
         show_Tasks("Completed")
+        input("Press Enter key to continue...")
+        print_menu("All")
         mydb.commit()
     else:
         print_menu("All")
@@ -223,6 +228,9 @@ def complete_Task(task):
 
 def show_Tasks(status):
     mycursor = mydb.cursor()
+    mycursor.execute("SELECT * FROM dailyTask")
+    if (len(mycursor.fetchall()) > 0):
+        flag = True
     if (status == "All"):
         mycursor.execute("SELECT * FROM dailyTask")
     elif (status == "Completed"):
@@ -237,13 +245,17 @@ def show_Tasks(status):
 
     for index in range(len(myresult)):
         myTable.add_row(myresult[index])
-    print(myresult[0][0])
-    print(myresult[1][0])
+
     if (len(myresult) > 0):
         print(myTable)
+        #input("Press Enter key to continue...")
+        # print_menu("All")
 
     else:
-        print("There is no task according to the selection.")
+        print("No record to show")
+        sleep(2)
+        print_menu("All")
+
     return len(myresult), myresult
 
     # print_menu("All")
