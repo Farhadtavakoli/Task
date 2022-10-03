@@ -63,10 +63,10 @@ def menu_input(menu_type):
             print("Add a task")
             add_task()
         elif menu_selection == "2":
-            uncompleted_tasks = show_Tasks("Not completed")
+            uncompleted_tasks = show_Tasks("Not completed", "complete")
 
             if (uncompleted_tasks[0] > 0):
-                complete_Task(uncompleted_tasks[1])
+                pass
             else:
                 print("There is no uncompleted task.")
                 sleep(2)
@@ -79,11 +79,11 @@ def menu_input(menu_type):
             # Edit_Tasks("All")
             pass
         elif menu_selection == "5":
-            show_Tasks("All")
+            show_Tasks("All", "show")
         elif menu_selection == "6":
-            show_Tasks("Completed")
+            show_Tasks("Completed", "show")
         elif menu_selection == "7":
-            show_Tasks("Not completed")
+            show_Tasks("Not completed", "show")
         elif menu_selection == "8":
             # Exit()
             pass
@@ -198,10 +198,6 @@ def complete_Task(task):
                 print("Your task for ", task[index][1], " is not done yet.")
         task_id_selection = "Wrong Id task! Enter the Id for the task please: "
 
-    #selection = int(result[1][0])
-    # print(type(selection))
-    # print(result[0])
-
     while flag != True:
         user_input = input(is_task_completed)
         if (user_input.lower() == "y" or user_input.lower() == "n"
@@ -217,16 +213,14 @@ def complete_Task(task):
 
         mycursor.execute("UPDATE dailyTask SET status = 'Done' WHERE Id LIKE %s",
                          ("%" + str(id) + "%",))
-        print("The task is completed")
-        show_Tasks("Completed")
-        input("Press Enter key to continue...")
+        input("The task is now completed. Press the Enter key please...")
         print_menu("All")
         mydb.commit()
     else:
         print_menu("All")
 
 
-def show_Tasks(status):
+def show_Tasks(status, type):
     mycursor = mydb.cursor()
     mycursor.execute("SELECT * FROM dailyTask")
     if (len(mycursor.fetchall()) > 0):
@@ -246,10 +240,14 @@ def show_Tasks(status):
     for index in range(len(myresult)):
         myTable.add_row(myresult[index])
 
-    if (len(myresult) > 0):
+    if (len(myresult) > 0 and type == "complete"):
         print(myTable)
-        #input("Press Enter key to continue...")
-        # print_menu("All")
+        complete_Task(myresult)
+        print_menu("All")
+    elif (len(myresult) > 0):
+        print(myTable)
+        input("Press Enter key please...")
+        print_menu("All")
 
     else:
         print("No record to show")
