@@ -14,7 +14,10 @@ mydb = mysql.connector.connect(
     password="YAsinbaba2021",
     database="myTasks"
 )
-print(".............", mydb)
+global task
+mycursor = mydb.cursor()
+mycursor.execute("SELECT * FROM dailyTask")
+task = mycursor.fetchall()
 
 # Making menu
 menu_options = {
@@ -73,13 +76,14 @@ def menu_input(menu_type):
                 print_menu("All")
 
         elif menu_selection == "3":
-            # Remove a task
-            pass
+            remove_task(task)
+
         elif menu_selection == "4":
             # Edit_Tasks("All")
             pass
         elif menu_selection == "5":
             show_Tasks("All", "show")
+
         elif menu_selection == "6":
             show_Tasks("Completed", "show")
         elif menu_selection == "7":
@@ -110,10 +114,20 @@ def menu_input(menu_type):
 # Add a task
 def add_task():
     status = "Not done"
-    title = input("Enter a title for the task: ")
-    explanation = input("Enter explanation: ")
-    date = input("Enter due date: ")
-    new_task = task_module.task(title, explanation, "Not Done", date)
+    title = ""
+    explanation = ""
+    date = ""
+    while title == "":
+        title = input("Enter a title for the task: ")
+        title = title.strip()
+    while explanation == "":
+        explanation = input("Enter explanation: ")
+        explanation = explanation.strip()
+    # TODO Add a date validation here
+    while date == "":
+        date = input("Enter due date: ")
+        date = date.strip()
+    new_task = task_module.task(title, explanation, status, date)
     # Saving to the database here
     print(new_task.title, new_task.explanation,
           new_task.status, new_task.date)
@@ -136,7 +150,6 @@ def search():
     user_input_Message = "Enter the Id for the task: "
 
     while (flag == False):
-
         selection = int(input(user_input_Message))
         print(type(selection))
         mycursor = mydb.cursor()
@@ -151,9 +164,6 @@ def search():
         for index in range(len(myresult)):
             if (selection == myresult[index][0]):
                 print("Found it on place ", index)
-                # mycursor.execute(
-                # "SELECT * FROM dailyTask WHERE Id LIKE (%s)", selection)
-
             else:
                 print(
                     "The Id number you entered is not in the uncompleted tasks' Id numbers")
@@ -163,10 +173,11 @@ def search():
 
         if len(myresult) != 0:
             flag = True
-
             break
+
         elif len(myresult) == 0:
             print("There is no uncompleted tasks in the bank.")
+
         else:
             user_input_Message = "Wrong Id! Please enter the Id for the task: "
     myTable = PrettyTable()
@@ -177,27 +188,52 @@ def search():
     return myTable, selection
 
 
-def complete_Task(task):
-    flag = False
+def find_id(task):
     id_flag = False
     global id
-    is_task_completed = "Do you want to complete the task ? [Y/N]: "
     task_id_selection = "Enter the Id for the task: "
 
     while id_flag != True:
-
-        selection = int(input(task_id_selection))
+        selection = input(task_id_selection)
+        selection = selection.strip()
         if selection == "":
             continue
-
-    #result = search()
+        selection = int(selection)
         for index in range(len(task)):
             if (selection) == task[index][0]:
                 id = task[index][0]
                 id_flag = True
-                print("Your task for ", task[index][1], " is not done yet.")
         task_id_selection = "Wrong Id task! Enter the Id for the task please: "
+    return id
 
+
+def remove_task(task):
+    flag = False
+    show_Tasks("All", "remove")
+    id = find_id(task)
+    remove_question = "Do you want to delete the task? [Y/N]: "
+    while flag != True:
+        user_input = input(remove_question)
+        if (user_input.lower() == "y" or user_input.lower() == "n"
+                or user_input.lower() == "yes" or user_input.lower() == "NO"):
+            break
+        else:
+            print("Wrong answer...")
+    if (user_input.lower() == "y"):
+        mycursor.execute("DELETE FROM dailyTask WHERE Id LIKE %s",
+                         ("%" + str(id) + "%",))
+        mydb.commit()
+        input("The task is now deleted. Press the Enter key please...")
+        print_menu("All")
+    else:
+        print_menu("All")
+
+
+def complete_Task(task):
+    flag = False
+    global id
+    is_task_completed = "Do you want to complete the task ? [Y/N]: "
+    id = find_id(task)
     while flag != True:
         user_input = input(is_task_completed)
         if (user_input.lower() == "y" or user_input.lower() == "n"
@@ -206,11 +242,6 @@ def complete_Task(task):
         else:
             print("Wrong answer...")
     if (user_input.lower() == "y"):
-
-       # sql = ("UPDATE dailyTask SET status = 'Done' WHERE Id LIKE %s",
-        # id)
-        #print("---------------->", sql)
-
         mycursor.execute("UPDATE dailyTask SET status = 'Done' WHERE Id LIKE %s",
                          ("%" + str(id) + "%",))
         input("The task is now completed. Press the Enter key please...")
@@ -233,7 +264,6 @@ def show_Tasks(status, type):
         mycursor.execute("SELECT * FROM dailyTask WHERE status='Not Done'")
 
     myresult = mycursor.fetchall()
-    # print(myresult, "<----------")
     myTable = PrettyTable()
     myTable.field_names = ["Id", "Title", "What to do", "Status", "Due date"]
 
@@ -244,6 +274,10 @@ def show_Tasks(status, type):
         print(myTable)
         complete_Task(myresult)
         print_menu("All")
+
+    elif (len(myresult) > 0 and type == "remove"):
+        print(myTable)
+
     elif (len(myresult) > 0):
         print(myTable)
         input("Press Enter key please...")
@@ -255,8 +289,6 @@ def show_Tasks(status, type):
         print_menu("All")
 
     return len(myresult), myresult
-
-    # print_menu("All")
 
 
 mycursor = mydb.cursor()
