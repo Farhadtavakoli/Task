@@ -59,7 +59,7 @@ def print_menu(show_option):
 
 def menu_input(menu_type):
     menu_selection = input("Select: ")
-    task_list = []
+
     if menu_type == "All":
         if menu_selection == "1":
             add_task()
@@ -138,10 +138,8 @@ def add_task():
         date = date.strip()
     new_task = task_module.task(title, explanation, status, date)
     # Saving to the database here
-    print(new_task.title, new_task.explanation,
-          new_task.status, new_task.date)
+    print("The new task is saved as ", new_task.title)
     # ****************
-
     sql = "INSERT INTO dailyTask (title, explanation,status,date) VALUES (%s, %s,%s,%s)"
 
     val = (new_task.title, new_task.explanation,
@@ -219,16 +217,7 @@ def find_id(task):
 
 def remove_task(task):
     flag = False
-    print(task)
-    print(len(task))
     mycursor = mydb.cursor()
-    '''mycursor.execute("SELECT * FROM dailyTask")
-    mycursor.fetchall()
-    if (len(task) == 0):
-        sql = "DELETE FROM dailyTask"
-        mycursor.execute(sql)
-        mydb.commit()'''
-
     show_Tasks("All", "edit")
     id = find_id(task)
     remove_question = "Do you want to delete the task? [Y/N]: "
@@ -306,8 +295,7 @@ def edit_task(task):
 def show_Tasks(status, type):
     mycursor = mydb.cursor()
     mycursor.execute("SELECT * FROM dailyTask")
-    if (len(mycursor.fetchall()) > 0):
-        flag = True
+
     if (status == "All"):
         mycursor.execute("SELECT * FROM dailyTask")
     elif (status == "Completed"):
@@ -336,7 +324,7 @@ def show_Tasks(status, type):
         print_menu("All")
 
     else:
-        print("No record to show")
+        print("There is no task to do or no task in daily tasks")
         sleep(2)
         print_menu("All")
 
