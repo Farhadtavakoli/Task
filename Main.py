@@ -1,6 +1,8 @@
 from ast import Delete
+from sqlite3 import Cursor
 # from curses import raw
 from time import sleep
+from turtle import title
 from unittest import result
 import task_module
 from prettytable import PrettyTable
@@ -14,10 +16,7 @@ mydb = mysql.connector.connect(
     password="YAsinbaba2021",
     database="myTasks"
 )
-global task
-mycursor = mydb.cursor()
-mycursor.execute("SELECT * FROM dailyTask")
-task = mycursor.fetchall()
+
 
 # Making menu
 menu_options = {
@@ -63,7 +62,6 @@ def menu_input(menu_type):
     task_list = []
     if menu_type == "All":
         if menu_selection == "1":
-            print("Add a task")
             add_task()
         elif menu_selection == "2":
             uncompleted_tasks = show_Tasks("Not completed", "complete")
@@ -76,11 +74,17 @@ def menu_input(menu_type):
                 print_menu("All")
 
         elif menu_selection == "3":
-            remove_task(task)
+            task = update_database()
+            if (len(task) > 0):
+                remove_task(task)
+            else:
+                print("No data to delete...")
+                sleep(1)
+                print_menu("")
 
         elif menu_selection == "4":
-            # Edit_Tasks("All")
-            pass
+            task = update_database()
+            edit_task(task)
         elif menu_selection == "5":
             show_Tasks("All", "show")
 
@@ -113,6 +117,11 @@ def menu_input(menu_type):
 
 # Add a task
 def add_task():
+    if (len(update_database()) == 0):
+        sql = "ALTER TABLE dailyTask AUTO_INCREMENT = 100"
+        mycursor = mydb.cursor()
+        mycursor.execute(sql)
+        mydb.commit()
     status = "Not done"
     title = ""
     explanation = ""
@@ -132,6 +141,7 @@ def add_task():
     print(new_task.title, new_task.explanation,
           new_task.status, new_task.date)
     # ****************
+
     sql = "INSERT INTO dailyTask (title, explanation,status,date) VALUES (%s, %s,%s,%s)"
 
     val = (new_task.title, new_task.explanation,
@@ -209,7 +219,17 @@ def find_id(task):
 
 def remove_task(task):
     flag = False
-    show_Tasks("All", "remove")
+    print(task)
+    print(len(task))
+    mycursor = mydb.cursor()
+    '''mycursor.execute("SELECT * FROM dailyTask")
+    mycursor.fetchall()
+    if (len(task) == 0):
+        sql = "DELETE FROM dailyTask"
+        mycursor.execute(sql)
+        mydb.commit()'''
+
+    show_Tasks("All", "edit")
     id = find_id(task)
     remove_question = "Do you want to delete the task? [Y/N]: "
     while flag != True:
@@ -230,6 +250,7 @@ def remove_task(task):
 
 
 def complete_Task(task):
+    mycursor = mydb.cursor()
     flag = False
     global id
     is_task_completed = "Do you want to complete the task ? [Y/N]: "
@@ -247,8 +268,39 @@ def complete_Task(task):
         input("The task is now completed. Press the Enter key please...")
         print_menu("All")
         mydb.commit()
+        update_database()
     else:
         print_menu("All")
+
+
+def edit_task(task):
+    show_Tasks("All", "edit")
+
+    id = (find_id(task))
+    title = ""
+    explanation = ""
+    date = ""
+    while title == "":
+        title = input("Enter new title for the task: ").strip()
+
+    while explanation == "":
+        explanation = input("Enter new explanation for the task: ").strip()
+    while date == "":
+        date = input("Enter new due date for the task: ").strip()
+
+    mycursor = mydb.cursor()
+    sql = ("UPDATE dailyTask SET title=%s , explanation=%s, date=%s WHERE Id=%s")
+    print(sql)
+    val = (title, explanation, date, id)
+    mycursor.execute(sql, val)
+    print("Changes are saved to the bank")
+    input("Press enter key to continue...")
+    print_menu("All")
+    #[id, title, explanation, status, date, id]
+    mydb.commit()
+    update_database()
+    mycursor.close()
+    mydb.close()
 
 
 def show_Tasks(status, type):
@@ -275,7 +327,7 @@ def show_Tasks(status, type):
         complete_Task(myresult)
         print_menu("All")
 
-    elif (len(myresult) > 0 and type == "remove"):
+    elif (len(myresult) > 0 and type == "remove" or type == "edit"):
         print(myTable)
 
     elif (len(myresult) > 0):
@@ -291,15 +343,17 @@ def show_Tasks(status, type):
     return len(myresult), myresult
 
 
-mycursor = mydb.cursor()
-mycursor.execute("SELECT * FROM dailyTask")
+def update_database():
+    mycursor = mydb.cursor()
+    mycursor.execute("SELECT * FROM dailyTask")
+    task = mycursor.fetchall()
+    return task
 
-myresult = mycursor.fetchall()
-if (len(myresult) == 0):
 
+update_database()
+if (len(update_database()) == 0):
     print_menu("")
 else:
-
     print_menu("All")
 
 
