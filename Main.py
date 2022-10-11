@@ -214,16 +214,22 @@ def find_id(task):
     task_id_selection = "Enter the Id for the task: "
 
     while id_flag != True:
-        selection = input(task_id_selection)
-        selection = selection.strip()
+        selection = input(task_id_selection).strip()
         if selection == "":
             continue
-        selection = int(selection)
-        for index in range(len(task)):
-            if (selection) == task[index][0]:
-                id = task[index][0]
-                id_flag = True
-        task_id_selection = "Wrong Id task! Enter the Id for the task please: "
+        if (input_validation("number", selection) == None):
+            print("An id for a task is a number!")
+            continue
+        else:
+            selection = int(selection)
+            for index in range(len(task)):
+                if (selection) == task[index][0]:
+                    id = task[index][0]
+                    id_flag = True
+                    break
+            if id_flag == False:
+                task_id_selection = "Id is not found in the list. Enter the Id for the task: "
+                continue
     return id
 
 
@@ -258,7 +264,7 @@ def complete_Task(task):
     is_task_completed = "Do you want to complete the task ? [Y/N]: "
     id = find_id(task)
     while flag != True:
-        user_input = input(is_task_completed)
+        user_input = input_validation("str", input(is_task_completed))
         if (user_input.lower() == "y" or user_input.lower() == "n"
                 or user_input.lower() == "yes" or user_input.lower() == "NO"):
             break
@@ -283,9 +289,9 @@ def edit_task(task):
     explanation = ""
     date = ""
     print("EDITING A TASK")
+
     while title == "":
         title = input("Enter new title for the task: ").strip()
-
     while explanation == "":
         explanation = input("Enter new explanation for the task: ").strip()
     while date == "":
@@ -302,8 +308,6 @@ def edit_task(task):
     #[id, title, explanation, status, date, id]
     mydb.commit()
     update_database()
-    mycursor.close()
-    mydb.close()
 
 
 def show_Tasks(status, type):
@@ -350,6 +354,17 @@ def update_database():
     mycursor.execute("SELECT * FROM dailyTask")
     task = mycursor.fetchall()
     return task
+
+
+def input_validation(input_type, input):
+    valid_input = False
+    if input_type == "number" and input.isdigit() == True:
+        valid_input = True
+        return valid_input
+
+    if input_type == "str":
+        input = input.strip()
+        return input
 
 
 update_database()
