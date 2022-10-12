@@ -128,26 +128,32 @@ def menu_input(menu_type):
 
 # Add a task
 def add_task():
+    valid_date = False
+    date = ""
     if (len(update_database()) == 0):
-        sql = "ALTER TABLE dailyTask AUTO_INCREMENT = 100"
+        sql = "ALTER TABLE dailyTask AUTO_INCREMENT = 1"
         mycursor = mydb.cursor()
         mycursor.execute(sql)
         mydb.commit()
     status = "Not done"
     title = ""
     explanation = ""
-    date = ""
+
     print("ADDING A TASK")
     while title == "":
-        title = input("Enter a title for the task: ")
-        title = title.strip()
+        title = input("Enter a title for the task: ").strip()
+
     while explanation == "":
-        explanation = input("Enter explanation: ")
-        explanation = explanation.strip()
+        explanation = input("Enter explanation: ").strip()
+    print("")
+    date = "00-00-00"
+    while date_validation(date) == False:
+        print("Date format is Year-month-day ")
+        date = due_date()
+
     # TODO Add a date validation here
-    while date == "":
-        date = input("Enter due date: ")
-        date = date.strip()
+
+    date = date.strip()
     new_task = task_module.task(title, explanation, status, date)
     # Saving to the database here
     print("The new task is saved as ", new_task.title)
@@ -163,6 +169,29 @@ def add_task():
     sleep(2)
     print_menu("All")
 # To make a task complete, change the status of the task!
+
+
+def due_date():
+    day = ""
+    month = ""
+    year = ""
+    print("")
+    print("Enter due date please: ")
+    while year == "" or year.isdigit() == False:
+        year = input("Enter Year: ").strip()
+        if (year.isdigit() and int(year) < 10):
+            year = "0"+year
+
+    while month == "" or month.isdigit() == False:
+        month = input("Enter Month: ").strip()
+        if (month.isdigit() and int(month) < 10):
+            month = "0"+month
+
+    while day == "" or day.isdigit() == False:
+        day = input("Enter Day: ").strip()
+        if (day.isdigit() and int(day) < 10):
+            day = "0"+day
+    return year+"-"+month+"-"+day
 
 
 def search():
@@ -363,6 +392,22 @@ def input_validation(input_type, input):
     if input_type == "str":
         input = input.strip()
         return input
+
+
+def date_validation(date):
+    day, month, year = date.split('-')
+
+    isValidDate = True
+    try:
+        datetime.datetime(int(year), int(month), int(day))
+    except ValueError:
+        isValidDate = False
+
+    if (isValidDate):
+        return True
+    else:
+
+        return False
 
 
 update_database()
