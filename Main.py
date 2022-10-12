@@ -299,13 +299,11 @@ def edit_task(task):
 
     mycursor = mydb.cursor(buffered=True)
     sql = ("UPDATE dailyTask SET title=%s , explanation=%s, date=%s WHERE Id=%s")
-    print(sql)
     val = (title, explanation, date, id)
     mycursor.execute(sql, val)
     print("Changes are saved to the bank")
     input("Press enter key to continue...")
     print_menu("All")
-    #[id, title, explanation, status, date, id]
     mydb.commit()
     update_database()
 
