@@ -179,16 +179,25 @@ def due_date():
     print("Enter due date please: ")
     while year == "" or year.isdigit() == False or year[0] == "0":
         year = input("Enter Year: ").strip()
-        if (year.isdigit() and int(year) < 10):
-            year = "0"+year
+        if int(year) < 2022 or len(year) > 4:
+            print("Due date is wrong!")
+            year = ""
+            continue
 
     while month == "" or month.isdigit() == False or int(month) > 12:
         month = input("Enter Month: ").strip()
         if (month.isdigit() and int(month) < 10):
             month = "0"+month
+        if int(month) > 12 or int(month) < 1 or len(month) > 2:
+            print("Wrong month format!")
+            continue
 
-    while day == "" or day.isdigit() == False or int(day) > 31:
+    while day == "" or day.isdigit() == False:
         day = input("Enter Day: ").strip()
+        if int(day) < 1 or int(day) > 31:
+            print("Wrong day format")
+            day = ""
+            continue
         if (day.isdigit() and int(day) < 10):
             day = "0"+day
     return year+"-"+month+"-"+day
@@ -342,7 +351,7 @@ def show_Tasks(status, type):
     mycursor.execute("SELECT * FROM dailyTask")
 
     if (status == "All"):
-        mycursor.execute("SELECT * FROM dailyTask")
+        mycursor.execute("SELECT * FROM dailyTask ORDER BY date")
     elif (status == "Completed"):
         mycursor.execute("SELECT * FROM dailyTask WHERE status='Done'")
     elif (status == "Not completed"):
