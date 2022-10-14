@@ -177,17 +177,17 @@ def due_date():
     year = ""
     print("")
     print("Enter due date please: ")
-    while year == "" or year.isdigit() == False:
+    while year == "" or year.isdigit() == False or year[0] == "0":
         year = input("Enter Year: ").strip()
         if (year.isdigit() and int(year) < 10):
             year = "0"+year
 
-    while month == "" or month.isdigit() == False:
+    while month == "" or month.isdigit() == False or int(month) > 12:
         month = input("Enter Month: ").strip()
         if (month.isdigit() and int(month) < 10):
             month = "0"+month
 
-    while day == "" or day.isdigit() == False:
+    while day == "" or day.isdigit() == False or int(day) > 31:
         day = input("Enter Day: ").strip()
         if (day.isdigit() and int(day) < 10):
             day = "0"+day
@@ -395,7 +395,7 @@ def input_validation(input_type, input):
 
 
 def date_validation(date):
-    day, month, year = date.split('-')
+    year, month, day = date.split('-')
 
     isValidDate = True
     try:
